@@ -1,8 +1,10 @@
 
 from tkinter import *
 from tkinter import ttk
-from tkinter import messagebox
 from PIL import Image, ImageTk, ImageFilter
+
+import pyautogui
+pyautogui.PAUSE = 0.05
 
 import json
 import requests
@@ -51,11 +53,12 @@ def sync_up() -> None:
 
     if len(playback_info)==1:
 
+        album_name = ""
         img_path = "./pictures/{}.png".format(playback_info["message"])
         place_main_img(img_path)
         return
 
-    # if track is an ad
+    # if track is an ad...
     
     # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
@@ -67,7 +70,6 @@ def sync_up() -> None:
         download_artwork(artwork_url)
         place_main_img("./pictures/artwork.png")
     
-
 def fetch_loop():
 
     sync_up()
@@ -144,6 +146,26 @@ def escape(event) -> None:
     
     quit()
 
+def space(event) -> None:
+
+    pyautogui.press("playpause")
+
+def right_arrow(event) -> None:
+
+    pyautogui.press("nexttrack")
+
+def left_arrow(event) -> None:
+
+    pyautogui.press("prevtrack")
+
+def up_arrow(event) -> None:
+
+    for _ in range(5): pyautogui.press("volumeup")
+
+def down_arrow(event) -> None:
+
+    for _ in range(5): pyautogui.press("volumedown")
+
 # frames - widgets - buttons ================
 main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=50)
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
@@ -163,10 +185,17 @@ if not os.path.exists("./.cache"): # user's first time opening the app
     sign_in_canvas.bind("<Leave>", sign_in_leave_hover) # hover off
     sign_in_canvas.bind("<Button-1>", sign_in_action) # click
 
-else:
+else: # not the user's first run
+    place_main_img("./pictures/loading.png")
     fetch_loop()
-    
+
 root.bind("<f>", toggle_fullscreen)
 root.bind("<Escape>", escape)
+root.bind("<space>", space)
+root.bind("<Right>", right_arrow)
+root.bind("<Left>", left_arrow)
+root.bind("<Up>", up_arrow)
+root.bind("<Down>", down_arrow)
+root.bind("<Double-Button-1>", toggle_fullscreen)
 # ===========================================
-if __name__=="__main__": root.mainloop()
+# if __name__=="__main__": root.mainloop()
