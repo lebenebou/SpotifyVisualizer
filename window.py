@@ -41,6 +41,8 @@ bg_img = None
 # functions =================================
 def sync_up() -> None:
 
+    os.system("cls")
+
     global album_name    
     if album_name=="": # first run
         
@@ -61,6 +63,8 @@ def sync_up() -> None:
 
     # if track is an ad...
     
+    print("Fetched song info: {} by {}.".format(playback_info["item"]["name"], playback_info["item"]["album"]["artists"][0]["name"]))
+    
     # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
 
@@ -70,6 +74,7 @@ def sync_up() -> None:
         artwork_url = playback_info["item"]["album"]["images"][0]["url"]
         download_artwork(artwork_url)
         place_main_img("./pictures/artwork.png")
+
     
 def fetch_loop():
 
@@ -187,7 +192,6 @@ if not os.path.exists("./.cache"): # user's first time opening the app
     sign_in_canvas.bind("<Button-1>", sign_in_action) # click
 
 else: # not the user's first run
-    place_main_img("./pictures/loading.png")
     fetch_loop()
 
 root.bind("<f>", toggle_fullscreen)
