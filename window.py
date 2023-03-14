@@ -5,6 +5,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 
 import json
+import requests
 import os
 current_dir = os.path.dirname(__file__)
 os.chdir(current_dir)
@@ -21,22 +22,40 @@ root.resizable(True, True)
 # variables =================================
 sign_in_img_id = None
 main_img_id = None
+album_name = "" # download new artowrk when this var changes
 
 # images ====================================
 shadow_img = ImageTk.PhotoImage(Image.open("./pictures/shadow.png"))
 sign_in_img = ImageTk.PhotoImage(Image.open("./pictures/sign_in.png"))
 sign_in_img_hovered = ImageTk.PhotoImage(Image.open("./pictures/sign_in_hovered.png"))
+blank_img = ImageTk.PhotoImage(Image.open("./pictures/blank.png"))
 
 # functions =================================
 def sync_up() -> None:
 
-    sign_in_canvas.destroy()
+    # destroy canveses on first run
+    if album_name=="": first_run_canvas.destroy(); sign_in_canvas.destroy()
+    
+    
+
+    root.after(2000, sync_up)
+
+def place_main_img(img_path: str) -> None:
+
+    pass
+
+def download_artwork(img_url: str) -> None:
+
+    with open("./pictures/artwork.png", "wb") as f:
+        f.write(requests.get(img_url).content)
 
 def sign_in_action(event) -> None:
 
     fetch_playback_info()
     sign_in_canvas.delete("all")
     sign_in_canvas.destroy()
+    first_run_canvas.delete("all")
+    first_run_canvas.destroy()
     sync_up()
 
 def sign_in_hover(event) -> None:
@@ -52,13 +71,17 @@ main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=5
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
 main_canvas.create_image(root.winfo_width()/2, root.winfo_height()/2, image=shadow_img)
-sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
+first_run_canvas = Canvas(root, bg="pink", highlightthickness=0, width=640, height=640)
+sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
 if not os.path.exists("./.cache"):
 
+    first_run_canvas.place(relx=0.5, rely=0.5, anchor=CENTER)
+    sign_in_img_id = first_run_canvas.create_image(blank_img.width()//2, blank_img.height()//2, image=blank_img)
+
     sign_in_canvas.place(relx=0.5, rely=0.7, anchor=CENTER)
-    sign_in_img_id = sign_in_canvas.create_image(240//2, 70//2, image=sign_in_img)
+    sign_in_canvas.create_image(sign_in_img.width()//2, sign_in_img.height()//2, image=sign_in_img)
 
 # Bindings ==================================
 sign_in_canvas.bind("<Enter>", sign_in_hover) # hover on
