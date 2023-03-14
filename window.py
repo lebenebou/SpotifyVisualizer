@@ -11,6 +11,7 @@ import requests
 import os
 current_dir = os.path.dirname(__file__)
 os.chdir(current_dir)
+os.system("cls")
 
 from fetcher import fetch_playback_info
 
@@ -198,4 +199,3 @@ root.bind("<Up>", up_arrow)
 root.bind("<Down>", down_arrow)
 root.bind("<Double-Button-1>", toggle_fullscreen)
 # ===========================================
-# if __name__=="__main__": root.mainloop()
