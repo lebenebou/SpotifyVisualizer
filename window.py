@@ -202,4 +202,6 @@ root.bind("<Left>", left_arrow)
 root.bind("<Up>", up_arrow)
 root.bind("<Down>", down_arrow)
 root.bind("<Double-Button-1>", toggle_fullscreen)
+
+root.protocol("WM_DELETE_WINDOW", quit)
 # ===========================================
