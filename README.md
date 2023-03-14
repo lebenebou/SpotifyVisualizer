@@ -1,5 +1,5 @@
 # SpotifyVisualizer
-Minimalist window that connects to the [Spotify API](https://developer.spotify.com/documentation/web-api/). and shows current playing track aesthetically. Allows for playback controls as well as muting ads for non-premium users. Made with Python using [Tkinter](https://docs.python.org/3/library/tkinter.html).
+Minimalist window that connects to the [Spotify API](https://developer.spotify.com/documentation/web-api/). Shows current playing track aesthetically in fullscreen. Allows for playback controls as well as muting ads for non-premium users. Made with Python using [Tkinter](https://docs.python.org/3/library/tkinter.html).
 
 ![Screenshot](https://raw.githubusercontent.com/lebenebou/SpotifyVisualizer3/main/pictures/screenshot.png)
 
