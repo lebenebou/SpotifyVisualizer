@@ -2,7 +2,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageFilter
 
 import json
 import requests
@@ -22,6 +22,8 @@ root.resizable(True, True)
 # variables =================================
 sign_in_img_id = None
 main_img_id = None
+bg_img_id = None
+shadow_img_id = None
 album_name = "" # download new artowrk when this var changes
 
 # images ====================================
@@ -46,9 +48,22 @@ def sync_up() -> None:
 def place_main_img(img_path: str) -> None:
 
     global main_img, main_img_id
+    global bg_img, bg_img_id
 
-    main_img = ImageTk.PhotoImage(Image.open(img_path))
-    main_img_id = main_canvas.create_image(root.winfo_width()/2, root.winfo_height()/2, image=main_img)
+    main_img = Image.open(img_path)
+
+    bg_img = main_img.resize((root.winfo_width(), root.winfo_width()), resample=0)
+    bg_img = bg_img.filter(ImageFilter.GaussianBlur(20))
+
+    bg_img = ImageTk.PhotoImage(bg_img)
+    main_img = ImageTk.PhotoImage(main_img)
+
+    main_canvas.delete(main_img_id)
+    main_canvas.delete(bg_img_id)
+
+    bg_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()/1.5, image=bg_img)
+    main_canvas.lift(shadow_img_id) # bring to top
+    main_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=main_img)
 
 def download_artwork(img_url: str) -> None:
 
@@ -78,7 +93,7 @@ def sign_in_leave_hover(event) -> None:
 main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=50)
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
-main_canvas.create_image(root.winfo_width()/2, root.winfo_height()/2, image=shadow_img)
+shadow_img_id = main_canvas.create_image(root.winfo_width()/2, root.winfo_height()/2, image=shadow_img)
 
 sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
