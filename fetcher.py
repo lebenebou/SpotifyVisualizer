@@ -31,7 +31,5 @@ def fetch_playback_info() -> None:
 
 if __name__=="__main__":
 
-    for i in range(1, 21):
-
-        fetch_playback_info()
-        print(f"Fetch {i}")
+    # on the first ever call of this function, user will be prompeted to sign in in the browser
+    fetch_playback_info()
