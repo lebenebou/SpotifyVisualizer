@@ -16,7 +16,7 @@ Every 2 seconds, new playback info is fetched and the window is updated to match
 ### Keyboard Shortcuts
 ```<F> or Double Click``` for toggling fullscreen.
 
-```space``` for play/pause.
+```<space>``` for play/pause.
 
 ```<left arrow / right arrow>``` for previous/next track.
 
