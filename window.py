@@ -43,7 +43,7 @@ def sync_up() -> None:
 
     os.system("cls")
 
-    global album_name    
+    global album_name
     if album_name=="": # first run
         
         sign_in_canvas.destroy()
@@ -54,10 +54,10 @@ def sync_up() -> None:
     playback_info = None
     with open("./playback_data.json", "r") as f: playback_info = json.load(f)
 
-    if len(playback_info)==1:
+    if len(playback_info)==1: # error in json
 
         album_name = ""
-        img_path = "./pictures/{}.png".format(playback_info["message"])
+        img_path = "./pictures/{}.png".format(playback_info["message"]) # display image that matches error
         place_main_img(img_path)
         return
 
@@ -68,14 +68,13 @@ def sync_up() -> None:
     # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
 
-    if current_album != album_name:
+    if current_album != album_name: # album cover has changed and needs updating
 
         album_name = current_album
         artwork_url = playback_info["item"]["album"]["images"][0]["url"]
         download_artwork(artwork_url)
         place_main_img("./pictures/artwork.png")
 
-    
 def fetch_loop():
 
     sync_up()
