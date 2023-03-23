@@ -25,39 +25,47 @@ root.resizable(True, True)
 root.attributes("-fullscreen", False)
 
 # variables ==================================
-sign_in_img_id = None
-main_img_id = None
-bg_img_id = None
-shadow_img_id = None
-album_name = "" # download new artowrk when this var changes
+sign_in_img_id = IntVar()
+main_img_id = IntVar()
+bg_img_id = IntVar()
+shadow_img_id = IntVar()
+
+window_state = StringVar() # describes the window state, is equal to the album name when a song is playing
+window_state.set("logged_out")
 
 # images ====================================
 shadow_img = ImageTk.PhotoImage(Image.open("./pictures/shadow.png"))
 sign_in_img = ImageTk.PhotoImage(Image.open("./pictures/sign_in.png"))
 sign_in_img_hovered = ImageTk.PhotoImage(Image.open("./pictures/sign_in_hovered.png"))
-main_img = None
-bg_img = None
+
+main_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
+bg_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
 
 # functions =================================
 def sync_up() -> None:
 
     os.system("cls")
 
-    global album_name
-    if album_name=="": # first run
+    if window_state.get()=="logged_out": # first ever run after logging in
         
         sign_in_canvas.destroy()
         place_main_img("./pictures/loading.png")
+        window_state.set("logged_in")
+        return
     
     fetch_playback_info()
 
     playback_info = None
-    with open("./playback_data.json", "r") as f: playback_info = json.load(f)
+    with open("./playback_data.json", "r") as f:
+        playback_info = json.load(f)
 
     if len(playback_info)==1: # error in json
 
-        album_name = ""
-        img_path = "./pictures/{}.png".format(playback_info["message"]) # display image that matches error
+        no_playback_reason = playback_info["message"]
+        window_state.set(no_playback_reason)
+
+        img_path = f"./pictures/{no_playback_reason}.png" # either spotify_closed or no_internet
+        main_canvas.delete("all")
         place_main_img(img_path)
         return
 
@@ -67,13 +75,16 @@ def sync_up() -> None:
     
     # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
+    is_playing = playback_info["is_playing"]
 
-    if current_album != album_name: # album cover has changed and needs updating
+    if current_album != window_state.get(): # album cover has changed and needs updating
 
-        album_name = current_album
+        window_state.set(current_album)
         artwork_url = playback_info["item"]["album"]["images"][0]["url"]
         download_artwork(artwork_url)
         place_main_img("./pictures/artwork.png")
+
+    # place playback controls
 
 def fetch_loop():
 
@@ -82,9 +93,7 @@ def fetch_loop():
 
 def place_main_img(img_path: str) -> None:
 
-    global main_img, main_img_id
-    global bg_img, bg_img_id
-    global shadow_img, shadow_img_id
+    global main_img, bg_img
 
     main_img = Image.open(img_path)
 
@@ -94,16 +103,11 @@ def place_main_img(img_path: str) -> None:
     bg_img = ImageTk.PhotoImage(bg_img)
     main_img = ImageTk.PhotoImage(main_img)
 
-    main_canvas.delete(main_img_id)
-    main_canvas.delete(bg_img_id)
-    main_canvas.delete(shadow_img_id)
+    main_canvas.itemconfig(main_img_id.get(), image=main_img)
+    main_canvas.itemconfig(bg_img_id.get(), image=bg_img)
 
-    bg_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//1.5, image=bg_img)
-    main_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=main_img)
-    shadow_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=shadow_img)
-
-    main_canvas.lift(shadow_img_id) # bring to top
-    main_canvas.lift(main_img_id) # bring to top
+    main_canvas.lift(shadow_img_id.get()) # bring to top
+    main_canvas.lift(main_img_id.get()) # bring to top
 
 def download_artwork(img_url: str) -> None:
 
@@ -124,11 +128,11 @@ def sign_in_action(event) -> None:
 
 def sign_in_hover(event) -> None:
 
-    sign_in_canvas.itemconfig(sign_in_img_id, image=sign_in_img_hovered)
+    sign_in_canvas.itemconfig(sign_in_img_id.get(), image=sign_in_img_hovered)
 
 def sign_in_leave_hover(event) -> None:
 
-    sign_in_canvas.itemconfig(sign_in_img_id, image=sign_in_img)
+    sign_in_canvas.itemconfig(sign_in_img_id.get(), image=sign_in_img)
 
 def toggle_fullscreen(event) -> None:
 
@@ -175,7 +179,9 @@ def down_arrow(event) -> None:
 main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=50)
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
-shadow_img_id = main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=shadow_img)
+shadow_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.15, image=shadow_img))
+main_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.15, image=main_img))
+bg_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=bg_img))
 
 sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
@@ -183,7 +189,7 @@ if not os.path.exists("./.cache"): # user's first time opening the app
 
     sign_in_canvas.place(relx=0.5, rely=0.7, anchor=CENTER)
     place_main_img("./pictures/first_run.png")
-    sign_in_img_id = sign_in_canvas.create_image(sign_in_img.width()//2, sign_in_img.height()//2, image=sign_in_img)
+    sign_in_img_id.set(sign_in_canvas.create_image(sign_in_img.width()//2, sign_in_img.height()//2, image=sign_in_img))
 
     # Bindings ==================================
     sign_in_canvas.bind("<Enter>", sign_in_hover) # hover on
@@ -193,6 +199,7 @@ if not os.path.exists("./.cache"): # user's first time opening the app
 else: # not the user's first run
     fetch_loop()
 
+# Key Bindings
 root.bind("<f>", toggle_fullscreen)
 root.bind("<Escape>", escape)
 root.bind("<space>", space)
@@ -204,3 +211,4 @@ root.bind("<Double-Button-1>", toggle_fullscreen)
 
 root.protocol("WM_DELETE_WINDOW", quit)
 # ===========================================
+root.mainloop()
