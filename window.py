@@ -29,6 +29,7 @@ sign_in_img_id = IntVar()
 main_img_id = IntVar()
 bg_img_id = IntVar()
 shadow_img_id = IntVar()
+layout_id = IntVar()
 
 window_state = StringVar() # describes the window state, is equal to the album name when a song is playing
 window_state.set("logged_out")
@@ -40,6 +41,8 @@ sign_in_img_hovered = ImageTk.PhotoImage(Image.open("./pictures/sign_in_hovered.
 
 main_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
 bg_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
+play_layout_image = ImageTk.PhotoImage(Image.open("./pictures/play_button.png"))
+pause_layout_image = ImageTk.PhotoImage(Image.open("./pictures/pause_button.png"))
 
 # functions =================================
 def sync_up() -> None:
@@ -65,7 +68,6 @@ def sync_up() -> None:
         window_state.set(no_playback_reason)
 
         img_path = f"./pictures/{no_playback_reason}.png" # either spotify_closed or no_internet
-        main_canvas.delete("all")
         place_main_img(img_path)
         return
 
@@ -75,7 +77,6 @@ def sync_up() -> None:
     
     # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
-    is_playing = playback_info["is_playing"]
 
     if current_album != window_state.get(): # album cover has changed and needs updating
 
@@ -85,6 +86,9 @@ def sync_up() -> None:
         place_main_img("./pictures/artwork.png")
 
     # place playback controls
+    is_playing = playback_info["is_playing"]
+    if is_playing: main_canvas.itemconfig(layout_id.get(), image=pause_layout_image)
+    else: main_canvas.itemconfig(layout_id.get(), image=play_layout_image)
 
 def fetch_loop():
 
@@ -179,9 +183,10 @@ def down_arrow(event) -> None:
 main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=50)
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
-shadow_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.15, image=shadow_img))
-main_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.15, image=main_img))
+shadow_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.25, image=shadow_img))
+main_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.25, image=main_img))
 bg_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=bg_img))
+layout_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=play_layout_image))
 
 sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
