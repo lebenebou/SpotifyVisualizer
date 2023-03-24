@@ -33,3 +33,8 @@ if __name__=="__main__":
 
     # on the first ever call of this function, user will be prompeted to sign in in the browser
     fetch_playback_info()
+
+    with open("playback_data.json", 'r') as f:
+        playback_info = json.load(f)
+
+    print("Fetched song info: {} by {}.".format(playback_info["item"]["name"], playback_info["item"]["album"]["artists"][0]["name"]))
