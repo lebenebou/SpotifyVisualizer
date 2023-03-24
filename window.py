@@ -29,7 +29,6 @@ sign_in_img_id = IntVar()
 main_img_id = IntVar()
 bg_img_id = IntVar()
 shadow_img_id = IntVar()
-layout_id = IntVar()
 
 window_state = StringVar() # describes the window state, is equal to the album name when a song is playing
 window_state.set("logged_out")
@@ -41,8 +40,6 @@ sign_in_img_hovered = ImageTk.PhotoImage(Image.open("./pictures/sign_in_hovered.
 
 main_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
 bg_img = ImageTk.PhotoImage(Image.open("./pictures/loading.png"))
-play_layout_image = ImageTk.PhotoImage(Image.open("./pictures/play_button.png"))
-pause_layout_image = ImageTk.PhotoImage(Image.open("./pictures/pause_button.png"))
 
 # functions =================================
 def sync_up() -> None:
@@ -56,7 +53,7 @@ def sync_up() -> None:
         window_state.set("logged_in")
         return
     
-    fetch_playback_info()
+    print("Fetching song info...", end="\r")
 
     playback_info = None
     with open("./playback_data.json", "r") as f:
@@ -71,28 +68,28 @@ def sync_up() -> None:
         place_main_img(img_path)
         return
     
-    if playback_info==None: return # json response is null in some rare cases
+    # rare case where json response is null
+    try: playback_info["item"]
+    except: return # end function to loop again
 
     # if track is an ad...
     #
     
+    # Normal playback state, successfully got playback info
     print("Fetched song info: {} by {}.".format(playback_info["item"]["name"], playback_info["item"]["album"]["artists"][0]["name"]))
     
-    # Normal playback state, successfully got playback info
     current_album = playback_info["item"]["album"]["name"]
 
     if current_album != window_state.get(): # album cover has changed and needs updating
 
         window_state.set(current_album)
-        artwork_url = playback_info["item"]["album"]["images"][0]["url"]
         place_main_img("./pictures/loading.png")
-        download_artwork(artwork_url)
-        return place_main_img("./pictures/artwork.png")
+        artwork_url = playback_info["item"]["album"]["images"][0]["url"]
 
-    # place playback controls
-    is_playing = playback_info["is_playing"]
-    if is_playing: main_canvas.itemconfig(layout_id.get(), image=pause_layout_image)
-    else: main_canvas.itemconfig(layout_id.get(), image=play_layout_image)
+        print("Downloading new artwork...", end="\r"+" "*50+"\r")
+        download_artwork(artwork_url)
+        print("Download Done.")
+        place_main_img("./pictures/artwork.png")
 
 def fetch_loop():
 
@@ -119,13 +116,8 @@ def place_main_img(img_path: str) -> None:
 
 def download_artwork(img_url: str) -> None:
 
-    print("Downloading new album artwork...", end="\r")
-
     with open("./pictures/artwork.png", "wb") as f:
         f.write(requests.get(img_url).content)
-
-    print(" "*50, end="\r")
-    print("Download done.")
 
 def sign_in_action(event) -> None:
 
@@ -187,10 +179,9 @@ def down_arrow(event) -> None:
 main_canvas = Canvas(root, bg="purple", highlightthickness=0, width=50, height=50)
 main_canvas.place(x=0, y=0, relwidth=1, relheight=1)
 
-shadow_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.25, image=shadow_img))
-main_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2.25, image=main_img))
+shadow_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=shadow_img))
+main_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=main_img))
 bg_img_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=bg_img))
-layout_id.set(main_canvas.create_image(root.winfo_width()//2, root.winfo_height()//2, image=play_layout_image))
 
 sign_in_canvas = Canvas(root, bg="yellow", highlightthickness=0, width=240, height=70)
 
