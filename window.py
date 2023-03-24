@@ -70,8 +70,11 @@ def sync_up() -> None:
         img_path = f"./pictures/{no_playback_reason}.png" # either spotify_closed or no_internet
         place_main_img(img_path)
         return
+    
+    if playback_info==None: return # json response is null in some rare cases
 
     # if track is an ad...
+    #
     
     print("Fetched song info: {} by {}.".format(playback_info["item"]["name"], playback_info["item"]["album"]["artists"][0]["name"]))
     
@@ -82,8 +85,9 @@ def sync_up() -> None:
 
         window_state.set(current_album)
         artwork_url = playback_info["item"]["album"]["images"][0]["url"]
+        place_main_img("./pictures/loading.png")
         download_artwork(artwork_url)
-        place_main_img("./pictures/artwork.png")
+        return place_main_img("./pictures/artwork.png")
 
     # place playback controls
     is_playing = playback_info["is_playing"]
