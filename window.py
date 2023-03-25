@@ -54,6 +54,7 @@ def sync_up() -> None:
         return
     
     print("Fetching song info...", end="\r")
+    fetch_playback_info()
 
     playback_info = None
     with open("./playback_data.json", "r") as f:
