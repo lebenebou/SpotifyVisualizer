@@ -70,8 +70,7 @@ def sync_up() -> None:
         return
     
     # rare case where json response is null
-    try: playback_info["item"]
-    except: return # end function to loop again
+    if playback_info["item"]==None: return
 
     # if track is an ad...
     #
